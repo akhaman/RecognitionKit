@@ -1,0 +1,18 @@
+PODS:
+  - RecognitionKit (0.1.0)
+  - RecognitionKit/UnitTests (0.1.0)
+
+DEPENDENCIES:
+  - RecognitionKit (from `../`)
+  - RecognitionKit/UnitTests (from `../`)
+
+EXTERNAL SOURCES:
+  RecognitionKit:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  RecognitionKit: 29e62bfc43a296601a9a02d1c87d5f2f32865bda
+
+PODFILE CHECKSUM: 651b3b55d47330d0eceff586493155ef95b1a111
+
+COCOAPODS: 1.11.3

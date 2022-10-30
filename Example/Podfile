@@ -1,0 +1,10 @@
+use_frameworks!
+install! 'cocoapods',
+         :share_schemes_for_development_pods => true,
+         :preserve_pod_file_structure => true
+
+platform :ios, '13.0'
+
+target 'RecognitionKit_Example' do
+  pod 'RecognitionKit', :path => '../', :testspecs => ['UnitTests']
+end
