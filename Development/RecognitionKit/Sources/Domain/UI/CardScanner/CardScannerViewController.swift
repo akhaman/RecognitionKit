@@ -10,30 +10,17 @@ import AVFoundation
 import Vision
 import CoreImage
 
-struct CardScannerOutputData {
-    struct ValidThru {
-        let month: String
-        let year: String
-    }
-    
-    let pan: String?
-    let validThru: String?
-    let cvc: String?
-}
-
 protocol CardScannerDelegate: AnyObject {
-    func cardScanner(didScan data: CardScannerOutputData)
+    func cardScanner(didScan data: CardData)
 }
 
 final class CardScannerViewController: UIViewController {
-    
     private let device: AVCaptureDevice
     private let session: AVCaptureSession = AVCaptureSession()
     private let videoOutput = AVCaptureVideoDataOutput()
     private let cardDataHandlingQueue = DispatchQueue(label: "recognitionKit.cardScanner.cardDataHandler", qos: .userInitiated)
-    
+    private let cardDataParser: ICardDataParser
     weak var delegate: CardScannerDelegate?
-    
     
     // MARK: UI
     
@@ -43,10 +30,17 @@ final class CardScannerViewController: UIViewController {
         return preview
     }()
     
+//    private lazy var maskView = MaskView(style: .card)
+    
     // MARK: Init
     
-    init(device: AVCaptureDevice) {
+    init?(device: AVCaptureDevice? = .default(for: .video), cardDataParser: ICardDataParser) {
+        guard let device = device else {
+            return nil
+        }
+
         self.device = device
+        self.cardDataParser = cardDataParser
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -55,14 +49,31 @@ final class CardScannerViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        stop()
+    }
+    
     // MARK: Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        setupUI()
+        session.startRunning()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        previewLayer.frame = view.bounds
     }
     
     // MARK: View Setting Up
+    
+    private func setupUI() {
+        setupCameraInput()
+        setupPreviewLayer()
+        setupVideoOutput()
+        setupMaskView()
+    }
     
     private func setupCameraInput() {
         let cameraInput = try! AVCaptureDeviceInput(device: device)
@@ -90,7 +101,16 @@ final class CardScannerViewController: UIViewController {
         connection.videoOrientation = .portrait
     }
     
+    private func setupMaskView() {
+//        view.addSubview(maskView)
+//        maskView.pinEdgesToSuperview()
+    }
     
+    // MARK: End
+    
+    private func stop() {
+        session.stopRunning()
+    }
 }
 
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
@@ -110,7 +130,7 @@ extension CardScannerViewController: AVCaptureVideoDataOutputSampleBufferDelegat
     }
     
     private func handleObservedCard(with buffer: CVImageBuffer) {
-        cardDataHandlingQueue.async {
+        cardDataHandlingQueue.async { [cardDataParser] in
             let ciImage = CIImage(cvImageBuffer: buffer)
             let width = UIScreen.main.bounds.width * 0.8
             let height = width * 0.55
@@ -141,17 +161,21 @@ extension CardScannerViewController: AVCaptureVideoDataOutputSampleBufferDelegat
             try? imageRequestHandler.perform([request])
             
             guard let texts = request.results, !texts.isEmpty else {
+                debugPrint("empty results")
                 return
             }
             
             let lines = texts
                 .flatMap { $0.topCandidates(20) }
-                .map { $0.string.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .map(\.string)
             
+            let cardData = cardDataParser.parse(recognizedTextLines: lines)
             
-            
-            
-            
+            DispatchQueue.main.async { [weak self] in
+                debugPrint(cardData)
+                self?.delegate?.cardScanner(didScan: cardData)
+            }
         }
     }
 }
+

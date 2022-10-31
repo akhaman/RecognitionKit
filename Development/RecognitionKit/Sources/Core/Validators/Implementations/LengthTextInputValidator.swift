@@ -18,3 +18,13 @@ final class LengthTextInputValidator: ITextInputValidator {
         validLengths.contains(input.count)
     }
 }
+
+extension LengthTextInputValidator {
+    convenience init<S: Sequence>(validLengths: S) where S.Element == Int {
+        self.init(validLengths: Set(validLengths))
+    }
+    
+    convenience init(validLengths: Int...) {
+        self.init(validLengths: Set(validLengths))
+    }
+}

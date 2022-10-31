@@ -7,10 +7,32 @@
 //
 
 import UIKit
+import RecognitionKit
 
 class ViewController: UIViewController {
+    
+    // MARK: Life Cycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .green
+        setupView()
+    }
+    
+    // MARK: Initial Configuration
+    
+    private func setupView() {
+        view.backgroundColor = .white
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .camera,
+            target: self,
+            action: #selector(startTapped)
+        )
+    }
+    
+    @objc private func startTapped() {
+        let viewController = CardScannerAssembly.assemble()
+        let navigationController = UINavigationController(rootViewController: viewController)
+        present(navigationController, animated: true)
     }
 }

@@ -8,5 +8,5 @@
 import Foundation
 
 protocol ICardDataParser {
-    func parse(recognizedTextLines lines: [String]) -> CardScannerOutputData
+    func parse(recognizedTextLines lines: [String]) -> CardData
 }

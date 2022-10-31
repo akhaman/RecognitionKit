@@ -22,7 +22,7 @@ final class CardDataParser: ICardDataParser {
         self.cvcParser = cvcParser
     }
     
-    func parse(recognizedTextLines lines: [String]) -> CardScannerOutputData {
+    func parse(recognizedTextLines lines: [String]) -> CardData {
         var pan: String?
         var validThru: String?
         var cvc: String?
@@ -45,7 +45,7 @@ final class CardDataParser: ICardDataParser {
             }
         }
         
-        return CardScannerOutputData(pan: pan, validThru: validThru, cvc: cvc)
+        return CardData(pan: pan, validThru: validThru, cvc: cvc)
     }
 }
 

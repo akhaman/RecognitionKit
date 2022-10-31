@@ -15,7 +15,8 @@ final class CompoundTextInputValidator: ITextInputValidator {
     }
     
     func validate(input: String) -> Bool {
-        validators.allSatisfy { $0.validate(input: input) }
+        debugPrint(input)
+        return validators.allSatisfy { $0.validate(input: input) }
     }
 }
 
