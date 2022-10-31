@@ -1,5 +1,5 @@
 @testable import RecognitionKit
-@import XCTest
+import XCTest
 
 final class RecognitionKitTests: XCTestCase {
     func test_dummy() {}
