@@ -31,17 +31,15 @@ public enum CardScannerAssembly {
             )
         )
         
-        let session = AVCaptureSession()
         let imageProcessor = SampleBufferImageProcessor()
         let textRecognizer = TextRecognizer()
         
-        let process = try! CaptureProcess(
-            captureSession: session,
+        let processor = try! CaptureProcess(
             bufferImageProcessor: imageProcessor,
             textRecognizer: textRecognizer
         )
         
-        let viewController = CardScannerViewController(cardDataParser: dataParser)!
+        let viewController = CardScannerViewController(cardDataParser: dataParser, captureProcessor: processor)!
         
         return viewController
     }

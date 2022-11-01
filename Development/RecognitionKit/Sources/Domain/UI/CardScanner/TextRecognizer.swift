@@ -9,19 +9,6 @@ import Foundation
 import CoreImage
 import Vision
 
-struct RecognizedText {
-    struct Bounds {
-        let topLeft: CGPoint
-        let topRight: CGPoint
-        let bottomLeft: CGPoint
-        let bottomRight: CGPoint
-        let boundingBox: CGRect
-    }
-    
-    let topCandidates: [String]
-    let bounds: Bounds
-}
-
 protocol ITextRecognizer {
     func recognize(textFrom image: CIImage) throws -> [RecognizedText]
 }
@@ -67,8 +54,6 @@ private extension RecognizedText {
         from result: VNRecognizedTextObservation,
         maxCandidatesCount: Int
     ) -> RecognizedText {
-        debugPrint(result)
-        
         let candidates = result
             .topCandidates(maxCandidatesCount)
             .map(\.string)
