@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import AVFoundation
 
 public enum CardScannerAssembly {
     public static func assemble() -> UIViewController {
@@ -14,23 +15,34 @@ public enum CardScannerAssembly {
             panParser: ReplacingTextParserDecorator(
                 replaces: .removingWhitespaces,
                 parser: ValidatingTextInputParser(
-                    validator: CompoundTextInputValidator(
-                        LengthTextInputValidator(validLengths: 13...28),
-                        CharacterSetTextInputValidator(validCharacterSet: .decimalDigits),
-                        LuhnValidator()
+                    validator: .allSatisfy(
+                        .length(13...28),
+                        .characterSet(.decimalDigits),
+                        .luhnAlgorithm
                     )
                 )
             ),
             validThruParser: ValidThruTextInputParser(options: .saveSlash),
             cvcParser: ValidatingTextInputParser(
-                validator: CompoundTextInputValidator(
-                    LengthTextInputValidator(validLengths: 3),
-                    CharacterSetTextInputValidator(validCharacterSet: .decimalDigits)
+                validator: .allSatisfy(
+                    .length(3),
+                    .characterSet(.decimalDigits)
                 )
             )
         )
         
+        let session = AVCaptureSession()
+        let imageProcessor = SampleBufferImageProcessor()
+        let textRecognizer = TextRecognizer()
+        
+        let process = try! CaptureProcess(
+            captureSession: session,
+            bufferImageProcessor: imageProcessor,
+            textRecognizer: textRecognizer
+        )
+        
         let viewController = CardScannerViewController(cardDataParser: dataParser)!
+        
         return viewController
     }
 }

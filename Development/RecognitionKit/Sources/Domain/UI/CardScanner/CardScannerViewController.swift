@@ -30,7 +30,7 @@ final class CardScannerViewController: UIViewController {
         return preview
     }()
     
-//    private lazy var maskView = MaskView(style: .card)
+    private lazy var maskView = MaskView(style: .card)
     
     // MARK: Init
     
@@ -160,19 +160,21 @@ extension CardScannerViewController: AVCaptureVideoDataOutputSampleBufferDelegat
             
             try? imageRequestHandler.perform([request])
             
-            guard let texts = request.results, !texts.isEmpty else {
+            guard let results = request.results, !results.isEmpty else {
                 debugPrint("empty results")
                 return
             }
             
-            let lines = texts
+            debugPrint(results)
+            
+            let lines = results
                 .flatMap { $0.topCandidates(20) }
                 .map(\.string)
             
             let cardData = cardDataParser.parse(recognizedTextLines: lines)
             
             DispatchQueue.main.async { [weak self] in
-                debugPrint(cardData)
+//                debugPrint(cardData)
                 self?.delegate?.cardScanner(didScan: cardData)
             }
         }

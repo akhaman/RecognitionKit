@@ -8,9 +8,9 @@
 import Foundation
 
 final class ValidatingTextInputParser: ITextInputParser {
-    private let validator: ITextInputValidator
+    private let validator: ITextValidator
     
-    init(validator: ITextInputValidator) {
+    init(validator: ITextValidator) {
         self.validator = validator
     }
     

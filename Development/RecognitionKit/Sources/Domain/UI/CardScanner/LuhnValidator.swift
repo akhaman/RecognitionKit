@@ -10,8 +10,8 @@ import Foundation
 /// Валидация номера карты с помощью алгоритма вычисления контрольной цифры
 /// номера в соответствии со стандартом `ISO/IEC 7812`
 ///
-/// [Реализация алгортима Луна с GitHub](https://gist.github.com/J-L/e2294d19677bbb34c6e1)
-final class LuhnValidator: ITextInputValidator {
+/// [Validation with Luhn's algorithm from GitHub](https://gist.github.com/J-L/e2294d19677bbb34c6e1)
+struct LuhnValidator: ITextValidator {
     func validate(input: String) -> Bool {
         var luhnSum = 0
         var digitCount = 0
@@ -33,5 +33,11 @@ final class LuhnValidator: ITextInputValidator {
             return true
         }
         return false
+    }
+}
+
+extension ITextValidator where Self == LuhnValidator {
+    static var luhnAlgorithm: LuhnValidator {
+        LuhnValidator()
     }
 }

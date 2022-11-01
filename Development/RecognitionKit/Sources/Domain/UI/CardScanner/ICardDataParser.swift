@@ -10,3 +10,11 @@ import Foundation
 protocol ICardDataParser {
     func parse(recognizedTextLines lines: [String]) -> CardData
 }
+
+final class CompoundDataRecognizer<PointOfInterest: Hashable> {
+    private var recognitions: [PointOfInterest: [String]] = [:]
+    
+    func recognize(input: String) {
+        
+    }
+}
