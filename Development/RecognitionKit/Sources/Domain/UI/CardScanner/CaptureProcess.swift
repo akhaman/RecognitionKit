@@ -18,7 +18,7 @@ enum RKError: Error {
 final class CaptureProcess: NSObject {
     private let bufferImageProcessor: ISampleBufferImageProcessor
     private let textRecognizer: ITextRecognizer
-    
+//    private let dataRecognizer:
     
     init(
         bufferImageProcessor: ISampleBufferImageProcessor,
@@ -44,10 +44,11 @@ extension CaptureProcess: AVCaptureVideoDataOutputSampleBufferDelegate {
        
         do {
             let recognizedTexts = try textRecognizer.recognize(textFrom: image)
-            
         } catch {
             debugPrint(error)
         }
+        
+        
     }
 }
 

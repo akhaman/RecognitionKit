@@ -7,6 +7,10 @@
 
 import Foundation
 
+protocol ICardDataParser {
+    func parse(recognizedTextLines lines: [String]) -> CardData
+}
+
 final class CardDataParser: ICardDataParser {
     private let panParser: ITextInputParser
     private let validThruParser: ITextInputParser

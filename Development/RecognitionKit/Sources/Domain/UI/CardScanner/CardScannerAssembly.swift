@@ -16,8 +16,8 @@ public enum CardScannerAssembly {
                 replaces: .removingWhitespaces,
                 parser: ValidatingTextInputParser(
                     validator: .allSatisfy(
-                        .length(13...28),
-                        .characterSet(.decimalDigits),
+                        .length(in: 13...28),
+                        .characters(in: .decimalDigits),
                         .luhnAlgorithm
                     )
                 )
@@ -25,8 +25,8 @@ public enum CardScannerAssembly {
             validThruParser: ValidThruTextInputParser(options: .saveSlash),
             cvcParser: ValidatingTextInputParser(
                 validator: .allSatisfy(
-                    .length(3),
-                    .characterSet(.decimalDigits)
+                    .length(in: 3),
+                    .characters(in: .decimalDigits)
                 )
             )
         )
