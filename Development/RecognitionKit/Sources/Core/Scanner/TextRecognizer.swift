@@ -9,44 +9,76 @@ import Foundation
 import CoreImage
 import Vision
 
-struct TextRecognitionCandidate: Hashable {
-    struct Point: RawRepresentable, Hashable {
-        let rawValue: CGPoint
+public struct TextRecognitionCandidate: Hashable {
+    public struct Point: RawRepresentable, Hashable {
+        public let rawValue: CGPoint
         
-        func hash(into hasher: inout Hasher) {
+        public init(rawValue: CGPoint) {
+            self.rawValue = rawValue
+        }
+        
+        public func hash(into hasher: inout Hasher) {
             hasher.combine(rawValue.x)
             hasher.combine(rawValue.y)
         }
     }
     
-    struct Size: RawRepresentable, Hashable {
-        let rawValue: CGSize
+    public struct Size: RawRepresentable, Hashable {
+        public let rawValue: CGSize
         
-        func hash(into hasher: inout Hasher) {
+        public init(rawValue: CGSize) {
+            self.rawValue = rawValue
+        }
+        
+        public func hash(into hasher: inout Hasher) {
             hasher.combine(rawValue.height)
             hasher.combine(rawValue.width)
         }
     }
     
-    struct Rect: RawRepresentable, Hashable {
-        let rawValue: CGRect
+    public struct Rect: RawRepresentable, Hashable {
+        public let rawValue: CGRect
         
-        func hash(into hasher: inout Hasher) {
+        public init(rawValue: CGRect) {
+            self.rawValue = rawValue
+        }
+        
+        public func hash(into hasher: inout Hasher) {
             hasher.combine(Point(rawValue: rawValue.origin))
             hasher.combine(Size(rawValue: rawValue.size))
         }
     }
     
-    struct Coordinates: Hashable {
-        let topLeft: Point
-        let topRight: Point
-        let bottomLeft: Point
-        let bottomRight: Point
-        let boundingBox: Rect
+    public struct Coordinates: Hashable {
+        public let topLeft: Point
+        public let topRight: Point
+        public let bottomLeft: Point
+        public let bottomRight: Point
+        public let boundingBox: Rect
+        
+        public init(
+            topLeft: Point,
+            topRight: Point,
+            bottomLeft: Point,
+            bottomRight: Point,
+            boundingBox: Rect
+        ) {
+            self.topLeft = topLeft
+            self.topRight = topRight
+            self.bottomLeft = bottomLeft
+            self.bottomRight = bottomRight
+            self.boundingBox = boundingBox
+        }
+        
     }
     
-    let stringValue: String
-    let coordinates: Coordinates
+    public let stringValue: String
+    public let coordinates: Coordinates
+    
+    public init(stringValue: String, coordinates: Coordinates) {
+        self.stringValue = stringValue
+        self.coordinates = coordinates
+    }
 }
 
 protocol ITextRecognizer {

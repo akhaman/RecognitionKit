@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ITextRecognizingBufferDelegate: AnyObject {
+public protocol ITextRecognizingBufferDelegate: AnyObject {
     func recognizingBuffer(
         _ buffer: ITextRecognizingBuffer,
         received receivedCandidates: Set<TextRecognitionCandidate>,
@@ -16,14 +16,14 @@ protocol ITextRecognizingBufferDelegate: AnyObject {
     )
 }
 
-protocol ITextRecognizingBuffer {
+public protocol ITextRecognizingBuffer {
     func setup(with delegate: ITextRecognizingBufferDelegate)
     func update(with candidates: Set<TextRecognitionCandidate>)
     func complete()
     func complete(with error: Error)
 }
 
-final class TextRecognizingBuffer<TokenID: Hashable> {
+public final class TextRecognizingBuffer<TokenID: Hashable> {
     typealias Completion = (_ result: Result<[TokenID: String], Error>) -> Void
     
     // MARK: Dependencies
@@ -41,7 +41,7 @@ final class TextRecognizingBuffer<TokenID: Hashable> {
     init(
         processors: [TokenID: ITokenProcessor],
         requiredRecognitionsCount: [TokenID: Int],
-        completionQueue: DispatchQueue,
+        completionQueue: DispatchQueue = .main,
         completion: @escaping Completion
     ) {
         self.processors = processors
@@ -66,11 +66,11 @@ final class TextRecognizingBuffer<TokenID: Hashable> {
 // MARK: - ITextRecognizingBuffer
 
 extension TextRecognizingBuffer: ITextRecognizingBuffer {
-    func setup(with delegate: ITextRecognizingBufferDelegate) {
+    public func setup(with delegate: ITextRecognizingBufferDelegate) {
         self.delegate = delegate
     }
     
-    func update(with candidates: Set<TextRecognitionCandidate>) {
+    public func update(with candidates: Set<TextRecognitionCandidate>) {
         let processedTokens: [TokenID: [ProcessedToken]] = candidates
             .map { candidate in
                 processors.compactMapValues { processor in
@@ -100,11 +100,11 @@ extension TextRecognizingBuffer: ITextRecognizingBuffer {
         )
     }
     
-    func complete() {
+    public func complete() {
         complete(with: .success(()))
     }
     
-    func complete(with error: Error) {
+    public func complete(with error: Error) {
         complete(with: .failure(error))
     }
         
