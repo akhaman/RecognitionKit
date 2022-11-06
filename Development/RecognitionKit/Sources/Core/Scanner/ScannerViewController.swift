@@ -1,5 +1,5 @@
 //
-//  CardScannerViewController.swift
+//  ScannerViewController.swift
 //  RecognitionKit
 //
 //  Created by Руслан Ахмадеев on 30.10.2022.
@@ -14,7 +14,7 @@ enum RKError: Error {
     case unableToConnectCaptureDevice
 }
 
-final class CardScannerViewController: UIViewController {
+final class ScannerViewController: UIViewController {
     private let device: AVCaptureDevice
     private let session: AVCaptureSession = AVCaptureSession()
     private let videoOutput = AVCaptureVideoDataOutput()
@@ -106,7 +106,7 @@ final class CardScannerViewController: UIViewController {
 
 // MARK: - ICaptureProcessDelegate
 
-extension CardScannerViewController: ICaptureProcessDelegate {
+extension ScannerViewController: ICaptureProcessDelegate {
     func captureProcessDidComplete(_ process: ICaptureProcess) {
         stop()
         dismiss(animated: true)

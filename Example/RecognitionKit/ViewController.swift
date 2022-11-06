@@ -45,7 +45,7 @@ class ViewController: UIViewController {
     }
     
     @objc private func startTapped() {
-        let viewController = try! CardScannerAssembly.cardScannerViewController { [weak self] result in
+        let viewController = try! ScannerAssembly.cardScannerViewController { [weak self] result in
             let result = result.map { results in
                 """
                 PAN: \(results[.pan] ?? .unrecognized)

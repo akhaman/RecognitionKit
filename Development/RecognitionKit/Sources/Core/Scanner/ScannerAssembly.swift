@@ -1,5 +1,5 @@
 //
-//  CardScannerAssembly.swift
+//  ScannerAssembly.swift
 //  RecognitionKit
 //
 //  Created by Руслан Ахмадеев on 31.10.2022.
@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import AVFoundation
 
-public enum CardScannerAssembly {
+public enum ScannerAssembly {
     public static func cardScannerViewController(
         receiveOn completionQueue: DispatchQueue = .main,
         _ completion: @escaping (_ result: Result<[CardTextIdentifiers: String], Error>) -> Void
@@ -23,7 +23,7 @@ public enum CardScannerAssembly {
             )
         )
         
-        return try CardScannerViewController(captureProcess: captureProcess)
+        return try ScannerViewController(captureProcess: captureProcess)
     }
 }
 
