@@ -15,7 +15,6 @@ class ViewController: UIViewController {
     private lazy var scanCardButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Scan card", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
         button.addTarget(self, action: #selector(scanCardTapped), for: .touchUpInside)
         return button
     }()
@@ -23,7 +22,6 @@ class ViewController: UIViewController {
     private lazy var scanPhoneNumberButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Scan phone number", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
         button.addTarget(self, action: #selector(scanPhoneNumberTapped), for: .touchUpInside)
         return button
     }()
@@ -38,7 +36,7 @@ class ViewController: UIViewController {
     // MARK: Initial Configuration
     
     private func setupView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         navigationItem.title = "RecognitionKit Example"
         navigationItem.largeTitleDisplayMode = .always
         
