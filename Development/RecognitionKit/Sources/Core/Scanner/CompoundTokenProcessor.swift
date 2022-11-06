@@ -174,11 +174,12 @@ extension TextProcessor.Strategy {
         let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
         
         return TextProcessor.Strategy { input in
-            let inputRange = NSRange(input.startIndex..<input.endIndex, in: input)
+            let inputRange = NSRange(input.startIndex..., in: input)
             
             return regex
                 .flatMap { $0.firstMatch(in: input, range: inputRange) }
-                .flatMap(\.replacementString)
+                .flatMap { Range($0.range, in: input) }
+                .map { String(input[$0]) }
         }
     }
 }

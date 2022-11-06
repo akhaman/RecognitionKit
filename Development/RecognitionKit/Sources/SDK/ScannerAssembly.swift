@@ -20,7 +20,6 @@ public enum ScannerAssembly {
         return try ScannerViewController(captureProcess: captureProcess)
     }
     
-    
     public static func cardScannerViewController(
         _ completion: @escaping (_ result: Result<[PaymentCardID: String], Error>) -> Void
     ) throws -> UIViewController {
@@ -66,10 +65,11 @@ public enum ScannerAssembly {
         let recognizingBuffer = TextRecognizingBuffer<PhoneNumberID>(
             processors: [
                 .phoneNumber: .textPipeline(
-                    .firstMatch(withRegex: "^[/\\+]?[(]?[0-9]{3}[)]?[-\\s\\.]?[0-9]{3}[-\\s\\.]?[0-9]{4,6}$")
+                    .firstMatch(withRegex: "(\\+7|7|8)?[\\s\\-]?\\(?[489][0-9]{2}\\)?[\\s\\-]?[0-9]{3}[\\s\\-]?[0-9]{2}[\\s\\-]?[0-9]{2}"),
+                    .replaceOccurrences(" ", with: "")
                 )
             ],
-            requiredRecognitionsCount: [.phoneNumber: 5],
+            requiredRecognitionsCount: [.phoneNumber: 20],
             completion: completion
         )
         
