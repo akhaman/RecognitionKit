@@ -125,6 +125,10 @@ extension ITextProcessor where Self == TextProcessor {
     static func trimCharacters(in set: CharacterSet) -> TextProcessor {
         TextProcessor(strategy: .trimCharacters(in: set))
     }
+    
+    static func firstMatch(withRegex pattern: String) -> TextProcessor {
+        TextProcessor(strategy: .firstMatch(withRegex: pattern))
+    }
 }
 
 extension TextProcessor.Strategy {
@@ -163,6 +167,18 @@ extension TextProcessor.Strategy {
     static func trimCharacters(in set: CharacterSet) -> TextProcessor.Strategy {
         TextProcessor.Strategy { text in
             text.trimmingCharacters(in: set)
+        }
+    }
+    
+    static func firstMatch(withRegex pattern: String) -> TextProcessor.Strategy {
+        let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+        
+        return TextProcessor.Strategy { input in
+            let inputRange = NSRange(input.startIndex..<input.endIndex, in: input)
+            
+            return regex
+                .flatMap { $0.firstMatch(in: input, range: inputRange) }
+                .flatMap(\.replacementString)
         }
     }
 }

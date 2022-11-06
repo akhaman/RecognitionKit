@@ -2,15 +2,18 @@
 import XCTest
 
 final class RecognitionKitTests: XCTestCase {
-    func test() {
-        let values = ["03/24", "03/24", "03/24", "10/24", "10/24", "10/24"]
+    func test() throws {
+        let pattern = "^[/+]?[(]?[0-9]{3}[)]?[-/s/.]?[0-9]{3}[-/s/.]?[0-9]{4,6}$"
+        let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+
+        let input = "Call-center: 8-800-2005-303 (6ecnnaTHbIM 3BOH"
         
-        let value = Dictionary(grouping: values) { $0 }
-            .max(by: { $0.value.count < $1.value.count })
-            .map(\.key)
+        let inputRange = NSRange(input.startIndex..<input.endIndex, in: input)
         
-        print("DEBUG: \(value)")
+        let match = (regex as NSRegularExpression?)
+            .flatMap { $0.firstMatch(in: input, range: inputRange) }
+            .flatMap(\.replacementString)
         
-        XCTAssertEqual(value, "03/24")
+        XCTAssertEqual(match, "8-800-2005-303")
     }
 }

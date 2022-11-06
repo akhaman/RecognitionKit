@@ -10,14 +10,21 @@ import UIKit
 import RecognitionKit
 
 class ViewController: UIViewController {
-    
     // MARK: UI
     
     private lazy var scanCardButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Scan card", for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
-        button.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(scanCardTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var scanPhoneNumberButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Scan phone number", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
+        button.addTarget(self, action: #selector(scanPhoneNumberTapped), for: .touchUpInside)
         return button
     }()
     
@@ -35,16 +42,19 @@ class ViewController: UIViewController {
         navigationItem.title = "RecognitionKit Example"
         navigationItem.largeTitleDisplayMode = .always
         
-        view.addSubview(scanCardButton)
-        scanCardButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            scanCardButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            scanCardButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
+        let stack = UIStackView(arrangedSubviews: [scanCardButton, scanPhoneNumberButton])
+        stack.axis = .vertical
+        stack.spacing = 16
         
+        view.addSubview(stack)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
     }
     
-    @objc private func startTapped() {
+    @objc private func scanCardTapped() {
         let viewController = try! ScannerAssembly.cardScannerViewController { [weak self] result in
             let result = result.map { results in
                 """
@@ -54,23 +64,38 @@ class ViewController: UIViewController {
                 """
             }
             
-            let message: String
-            
-            switch result {
-            case let .success(string):
-                message = string
-            case let .failure(error):
-                message = "Failed with error: \(error)"
-            }
-            
-            self?.showAlert(message: message)
+            self?.showAlert(messageResult: result)
         }
         
         let navigationController = UINavigationController(rootViewController: viewController)
         present(navigationController, animated: true)
     }
     
-    private func showAlert(message: String) {
+    @objc private func scanPhoneNumberTapped() {
+        let viewController = try! ScannerAssembly.phoneNumberScannerViewController { [weak self] result in
+            let result = result.map { results in
+                """
+                PhoneNumber: \(results[.phoneNumber] ?? .unrecognized)
+                """
+            }
+            
+            self?.showAlert(messageResult: result)
+        }
+        
+        let navigationController = UINavigationController(rootViewController: viewController)
+        present(navigationController, animated: true)
+    }
+    
+    private func showAlert(messageResult: Result<String, Error>) {
+        let message: String
+        
+        switch messageResult {
+        case let .success(string):
+            message = string
+        case let .failure(error):
+            message = "Failed with error: \(error)"
+        }
+        
         let alert = UIAlertController(title: "Scan completed", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "ok", style: .default))
         present(alert, animated: true)

@@ -76,6 +76,10 @@ extension CaptureProcess: ITextRecognizingBufferDelegate {
         updatedWith candidates: Set<TextRecognitionCandidate>,
         completelyFilled: Bool
     ) {
+        
+        debugPrint("RECEIVED: \(receivedCandidates)")
+        debugPrint("UPDATED: \(candidates)")
+        debugPrint("FILLED: \(completelyFilled)")
         if completelyFilled {
             DispatchQueue.main.async { [weak delegate] in
                 delegate?.captureProcessDidComplete(self)

@@ -25,6 +25,22 @@ public enum ScannerAssembly {
         
         return try ScannerViewController(captureProcess: captureProcess)
     }
+    
+    public static func phoneNumberScannerViewController(
+        receiveOn completionQueue: DispatchQueue = .main,
+        _ completion: @escaping (_ result: Result<[PhoneNumberIdentifier: String], Error>) -> Void
+    ) throws -> UIViewController {
+        let captureProcess = CaptureProcess(
+            bufferImageProcessor: SampleBufferImageProcessor(),
+            textRecognizer: TextRecognizer(),
+            recognizingBuffer: TextRecognizingBuffer<PhoneNumberIdentifier>.phoneNumberScan(
+                receiveOn: completionQueue,
+                completion
+            )
+        )
+        
+        return try ScannerViewController(captureProcess: captureProcess)
+    }
 }
 
 private extension TextRecognizingBuffer {
@@ -66,6 +82,22 @@ private extension TextRecognizingBuffer {
             completion: completion
         )
     }
+    
+    static func phoneNumberScan(
+        receiveOn completionQueue: DispatchQueue,
+        _ completion:  @escaping (_ result: Result<[PhoneNumberIdentifier: String], Error>) -> Void
+    ) -> TextRecognizingBuffer<PhoneNumberIdentifier> {
+        TextRecognizingBuffer<PhoneNumberIdentifier>(
+            processors: [
+                .phoneNumber: .textPipeline(
+                    .firstMatch(withRegex: "^[/\\+]?[(]?[0-9]{3}[)]?[-\\s\\.]?[0-9]{3}[-\\s\\.]?[0-9]{4,6}$")
+                )
+            ],
+            requiredRecognitionsCount: [.phoneNumber: 5],
+            completionQueue: completionQueue,
+            completion: completion
+        )
+    }
 }
 
 public struct CardTextIdentifiers: RawRepresentable, Hashable {
@@ -74,11 +106,23 @@ public struct CardTextIdentifiers: RawRepresentable, Hashable {
     }
     
     public static var validThru: CardTextIdentifiers {
-        CardTextIdentifiers(rawValue: "valid")
+        CardTextIdentifiers(rawValue: "validThru")
     }
     
     public static var cvc: CardTextIdentifiers {
         CardTextIdentifiers(rawValue: "cvc")
+    }
+    
+    public let rawValue: String
+    
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+}
+
+public struct PhoneNumberIdentifier: RawRepresentable, Hashable {
+    public static var phoneNumber: PhoneNumberIdentifier {
+        PhoneNumberIdentifier(rawValue: "phoneNumber")
     }
     
     public let rawValue: String
