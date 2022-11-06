@@ -10,8 +10,8 @@ import AVFoundation
 import Vision
 import CoreImage
 
-protocol CardScannerDelegate: AnyObject {
-    func cardScanner(didScan data: CardData)
+enum RKError: Error {
+    case unableToConnectCaptureDevice
 }
 
 final class CardScannerViewController: UIViewController {
@@ -20,9 +20,7 @@ final class CardScannerViewController: UIViewController {
     private let videoOutput = AVCaptureVideoDataOutput()
     private let cardDataHandlingQueue = DispatchQueue(label: "recognitionKit.cardScanner.cardDataHandler", qos: .userInitiated)
     private let captureProcess: ICaptureProcess
-    
-    weak var delegate: CardScannerDelegate?
-    
+        
     // MARK: UI
     
     private lazy var previewLayer: AVCaptureVideoPreviewLayer = {
@@ -30,20 +28,14 @@ final class CardScannerViewController: UIViewController {
         preview.videoGravity = .resize
         return preview
     }()
-    
-    private lazy var maskView = MaskView(style: .card)
-    
+        
     // MARK: Init
     
-    init?(
+    init(
         device: AVCaptureDevice? = .default(for: .video),
         captureProcess: ICaptureProcess
-    ) {
-        guard let device = device else {
-            return nil
-        }
-
-        self.device = device
+    ) throws {
+        self.device = try device.orThrow(RKError.unableToConnectCaptureDevice)
         self.captureProcess = captureProcess
         super.init(nibName: nil, bundle: nil)
     }
@@ -77,7 +69,6 @@ final class CardScannerViewController: UIViewController {
         setupPreviewLayer()
         setupVideoOutput()
         captureProcess.setup(with: self)
-        setupMaskView()
     }
     
     private func setupCameraInput() {
@@ -106,17 +97,14 @@ final class CardScannerViewController: UIViewController {
         connection.videoOrientation = .portrait
     }
     
-    private func setupMaskView() {
-//        view.addSubview(maskView)
-//        maskView.pinEdgesToSuperview()
-    }
-    
     // MARK: End
     
     private func stop() {
         session.stopRunning()
     }
 }
+
+// MARK: - ICaptureProcessDelegate
 
 extension CardScannerViewController: ICaptureProcessDelegate {
     func captureProcessDidComplete(_ process: ICaptureProcess) {

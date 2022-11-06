@@ -11,10 +11,6 @@ import Vision
 import CoreImage
 import UIKit
 
-enum RKError: Error {
-    case unableToConnectCaptureDevice
-}
-
 protocol ICaptureProcessDelegate: AnyObject {
     func captureProcessDidComplete(_ process: ICaptureProcess)
 }

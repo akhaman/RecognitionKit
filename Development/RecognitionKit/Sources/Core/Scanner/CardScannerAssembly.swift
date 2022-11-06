@@ -13,22 +13,22 @@ public enum CardScannerAssembly {
     public static func cardScannerViewController(
         receiveOn completionQueue: DispatchQueue = .main,
         _ completion: @escaping (_ result: Result<[CardTextIdentifiers: String], Error>) -> Void
-    ) -> UIViewController {
+    ) throws -> UIViewController {
         let captureProcess = CaptureProcess(
             bufferImageProcessor: SampleBufferImageProcessor(),
             textRecognizer: TextRecognizer(),
-            recognizingBuffer: TextRecognizingBuffer<CardTextIdentifiers>.default(
+            recognizingBuffer: TextRecognizingBuffer<CardTextIdentifiers>.`cardScan`(
                 receiveOn: completionQueue,
                 completion
             )
         )
         
-        return CardScannerViewController(captureProcess: captureProcess)!
+        return try CardScannerViewController(captureProcess: captureProcess)
     }
 }
 
 private extension TextRecognizingBuffer {
-    static func `default`(
+    static func cardScan(
         receiveOn completionQueue: DispatchQueue = .main,
         _ completion: @escaping (_ result: Result<[CardTextIdentifiers: String], Error>) -> Void
     ) -> TextRecognizingBuffer<CardTextIdentifiers> {
