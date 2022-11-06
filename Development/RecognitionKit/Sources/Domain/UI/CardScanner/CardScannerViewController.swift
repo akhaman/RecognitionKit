@@ -19,8 +19,7 @@ final class CardScannerViewController: UIViewController {
     private let session: AVCaptureSession = AVCaptureSession()
     private let videoOutput = AVCaptureVideoDataOutput()
     private let cardDataHandlingQueue = DispatchQueue(label: "recognitionKit.cardScanner.cardDataHandler", qos: .userInitiated)
-    private let cardDataParser: ICardDataParser
-    private let captureProcessor: AVCaptureVideoDataOutputSampleBufferDelegate
+    private let captureProcess: ICaptureProcess
     
     weak var delegate: CardScannerDelegate?
     
@@ -38,16 +37,14 @@ final class CardScannerViewController: UIViewController {
     
     init?(
         device: AVCaptureDevice? = .default(for: .video),
-        cardDataParser: ICardDataParser,
-        captureProcessor: AVCaptureVideoDataOutputSampleBufferDelegate
+        captureProcess: ICaptureProcess
     ) {
         guard let device = device else {
             return nil
         }
 
         self.device = device
-        self.cardDataParser = cardDataParser
-        self.captureProcessor = captureProcessor
+        self.captureProcess = captureProcess
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -79,6 +76,7 @@ final class CardScannerViewController: UIViewController {
         setupCameraInput()
         setupPreviewLayer()
         setupVideoOutput()
+        captureProcess.setup(with: self)
         setupMaskView()
     }
     
@@ -97,7 +95,7 @@ final class CardScannerViewController: UIViewController {
         ] as [String: Any]
         
         let outputQueue = DispatchQueue(label: "recognitionKit.cardScanner.videoOutput")
-        videoOutput.setSampleBufferDelegate(captureProcessor, queue: outputQueue)
+        videoOutput.setSampleBufferDelegate(captureProcess, queue: outputQueue)
         session.addOutput(videoOutput)
         
         guard let connection = videoOutput.connection(with: .video),
@@ -117,5 +115,12 @@ final class CardScannerViewController: UIViewController {
     
     private func stop() {
         session.stopRunning()
+    }
+}
+
+extension CardScannerViewController: ICaptureProcessDelegate {
+    func captureProcessDidComplete(_ process: ICaptureProcess) {
+        stop()
+        dismiss(animated: true)
     }
 }

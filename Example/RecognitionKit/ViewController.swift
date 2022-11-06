@@ -11,6 +11,16 @@ import RecognitionKit
 
 class ViewController: UIViewController {
     
+    // MARK: UI
+    
+    private lazy var scanCardButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Scan card", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
+        button.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
+        return button
+    }()
+    
     // MARK: Life Cycle
     
     override func viewDidLoad() {
@@ -22,17 +32,51 @@ class ViewController: UIViewController {
     
     private func setupView() {
         view.backgroundColor = .white
+        navigationItem.title = "RecognitionKit Example"
+        navigationItem.largeTitleDisplayMode = .always
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .camera,
-            target: self,
-            action: #selector(startTapped)
-        )
+        view.addSubview(scanCardButton)
+        scanCardButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            scanCardButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            scanCardButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
     }
     
     @objc private func startTapped() {
-        let viewController = CardScannerAssembly.assemble()
+        let viewController = CardScannerAssembly.cardScannerViewController { [weak self] result in
+            let result = result.map { results in
+                """
+                PAN: \(results[.pan] ?? .unrecognized)
+                ValidThru: \(results[.validThru] ?? .unrecognized)
+                CVC: \(results[.cvc] ?? .unrecognized)
+                """
+            }
+            
+            let message: String
+            
+            switch result {
+            case let .success(string):
+                message = string
+            case let .failure(error):
+                message = "Failed with error: \(error)"
+            }
+            
+            self?.showAlert(message: message)
+        }
+        
         let navigationController = UINavigationController(rootViewController: viewController)
         present(navigationController, animated: true)
     }
+    
+    private func showAlert(message: String) {
+        let alert = UIAlertController(title: "Scan completed", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "ok", style: .default))
+        present(alert, animated: true)
+    }
+}
+
+private extension String {
+    static let unrecognized = "unrecognized"
 }

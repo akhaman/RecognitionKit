@@ -51,6 +51,10 @@ extension ITextValidator where Self == TextValidator {
     static func characters(in validCharacters: CharacterSet) -> TextValidator {
         TextValidator(strategy: .characters(in: validCharacters))
     }
+    
+    static func matches(withRegex pattern: String) -> TextValidator {
+        TextValidator(strategy: .matches(withRegex: pattern))
+    }
 }
 
 extension TextValidator.Strategy {
@@ -77,6 +81,20 @@ extension TextValidator.Strategy {
     static func characters(in validCharacters: CharacterSet) -> TextValidator.Strategy {
         TextValidator.Strategy { input in
             CharacterSet(charactersIn: input).isSubset(of: validCharacters)
+        }
+    }
+    
+    static func matches(withRegex pattern: String) -> TextValidator.Strategy {
+        let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+        
+        return TextValidator.Strategy { input in
+            let inputRange = NSRange(input.startIndex..<input.endIndex, in: input)
+
+            return regex
+                .flatMap { $0.firstMatch(in: input, range: inputRange) }
+                .map(\.range)
+                .map { $0 == inputRange }
+                .or(false)
         }
     }
 }

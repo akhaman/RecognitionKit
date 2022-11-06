@@ -51,13 +51,15 @@ final class TextRecognizingBuffer<TokenID: Hashable> {
     }
     
     private func unfilledTokens() -> Set<TokenID> {
-        processors
+        let result = processors
             .filter { tokenID, _ in
-                requiredRecognitionsCount[tokenID, default: .zero]
-                <= bufferedNormalizedTokens[tokenID, default: []].count
+                bufferedNormalizedTokens[tokenID, default: []].count
+                < requiredRecognitionsCount[tokenID, default: .zero]
             }
             .keys
             .convertToSet()
+        
+        return result
     }
 }
 
@@ -71,9 +73,10 @@ extension TextRecognizingBuffer: ITextRecognizingBuffer {
     func update(with candidates: Set<TextRecognitionCandidate>) {
         let processedTokens: [TokenID: [ProcessedToken]] = candidates
             .map { candidate in
-                processors
-                    .compactMapValues {
-                        $0.resolve(candidate: candidate, context: candidates.subtracting(candidate))
+                processors.compactMapValues { processor in
+                    processor
+                        .process(candidate: candidate, context: candidates.subtracting(candidate))
+                        .map { ProcessedToken(origin: candidate, result: $0) }
                     }
             }
             .reduce(into: [:]) { partialResult, processedTokens in
@@ -84,7 +87,7 @@ extension TextRecognizingBuffer: ITextRecognizingBuffer {
         
         processedTokens.forEach { tokenID, tokens in
             bufferedNormalizedTokens[tokenID, default: []]
-                .append(contentsOf: tokens.map(\.normalizedToken))
+                .append(contentsOf: tokens.map(\.result))
         }
         
         delegate?.recognizingBuffer(
@@ -125,7 +128,7 @@ extension TextRecognizingBuffer: ITextRecognizingBuffer {
 private extension Sequence where Element: Hashable {
     var mostFrequentElement: Element? {
         Dictionary(grouping: self) { $0 }
-            .max(by: { $0.value.count >= $1.value.count })
+            .max(by: { $0.value.count < $1.value.count })
             .map(\.key)
     }
 }

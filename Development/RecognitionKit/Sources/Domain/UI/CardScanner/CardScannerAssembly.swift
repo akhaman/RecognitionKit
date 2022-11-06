@@ -10,37 +10,80 @@ import UIKit
 import AVFoundation
 
 public enum CardScannerAssembly {
-    public static func assemble() -> UIViewController {
-        let dataParser = CardDataParser(
-            panParser: ReplacingTextParserDecorator(
-                replaces: .removingWhitespaces,
-                parser: ValidatingTextInputParser(
-                    validator: .allSatisfy(
-                        .length(in: 13...28),
-                        .characters(in: .decimalDigits),
-                        .luhnAlgorithm
-                    )
-                )
-            ),
-            validThruParser: ValidThruTextInputParser(options: .saveSlash),
-            cvcParser: ValidatingTextInputParser(
-                validator: .allSatisfy(
-                    .length(in: 3),
-                    .characters(in: .decimalDigits)
-                )
+    public static func cardScannerViewController(
+        receiveOn completionQueue: DispatchQueue = .main,
+        _ completion: @escaping (_ result: Result<[CardTextIdentifiers: String], Error>) -> Void
+    ) -> UIViewController {
+        let captureProcess = CaptureProcess(
+            bufferImageProcessor: SampleBufferImageProcessor(),
+            textRecognizer: TextRecognizer(),
+            recognizingBuffer: TextRecognizingBuffer<CardTextIdentifiers>.default(
+                receiveOn: completionQueue,
+                completion
             )
         )
         
-        let imageProcessor = SampleBufferImageProcessor()
-        let textRecognizer = TextRecognizer()
-        
-        let processor = try! CaptureProcess(
-            bufferImageProcessor: imageProcessor,
-            textRecognizer: textRecognizer
+        return CardScannerViewController(captureProcess: captureProcess)!
+    }
+}
+
+private extension TextRecognizingBuffer {
+    static func `default`(
+        receiveOn completionQueue: DispatchQueue = .main,
+        _ completion: @escaping (_ result: Result<[CardTextIdentifiers: String], Error>) -> Void
+    ) -> TextRecognizingBuffer<CardTextIdentifiers> {
+        TextRecognizingBuffer<CardTextIdentifiers>(
+            processors: [
+                .pan: .textPipeline(
+                    .temporaryMutation(
+                        .replaceOccurrences(" ", with: ""),
+                        .validate(
+                            .allSatisfy(
+                                .length(in: 13...28),
+                                .characters(in: .decimalDigits),
+                                .luhnAlgorithm
+                            )
+                        )
+                    )
+                ),
+                .validThru: .textPipeline(
+                    .validate(
+                        .matches(withRegex: "(0[1-9]|1[0-2])/[0-9]{2}")
+                    )
+                ),
+                .cvc: .textPipeline(
+                    .validate(
+                        .matches(withRegex: "[0-9]{3}")
+                    )
+                )
+            ],
+            requiredRecognitionsCount: [
+                .pan: 5,
+                .validThru: 5,
+                .cvc: 0
+            ],
+            completionQueue: completionQueue,
+            completion: completion
         )
-        
-        let viewController = CardScannerViewController(cardDataParser: dataParser, captureProcessor: processor)!
-        
-        return viewController
+    }
+}
+
+public struct CardTextIdentifiers: RawRepresentable, Hashable {
+    public static var pan: CardTextIdentifiers {
+        CardTextIdentifiers(rawValue: "pan")
+    }
+    
+    public static var validThru: CardTextIdentifiers {
+        CardTextIdentifiers(rawValue: "valid")
+    }
+    
+    public static var cvc: CardTextIdentifiers {
+        CardTextIdentifiers(rawValue: "cvc")
+    }
+    
+    public let rawValue: String
+    
+    public init(rawValue: String) {
+        self.rawValue = rawValue
     }
 }

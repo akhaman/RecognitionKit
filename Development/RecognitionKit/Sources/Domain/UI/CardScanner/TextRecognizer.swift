@@ -9,10 +9,6 @@ import Foundation
 import CoreImage
 import Vision
 
-protocol ITextRecognizer {
-    func recognize(textFrom image: CIImage) throws -> [TextRecognitionCandidate]
-}
-
 struct TextRecognitionCandidate: Hashable {
     struct Point: RawRepresentable, Hashable {
         let rawValue: CGPoint
@@ -53,15 +49,13 @@ struct TextRecognitionCandidate: Hashable {
     let coordinates: Coordinates
 }
 
+protocol ITextRecognizer {
+    func recognize(textFrom image: CIImage) throws -> [TextRecognitionCandidate]
+}
+
 final class TextRecognizer: ITextRecognizer {
     enum Error: Swift.Error {
         case noDataFound
-    }
-    
-    private let maxCandidatesCount: Int
-    
-    init(maxCandidatesCount: Int = 20) {
-        self.maxCandidatesCount = maxCandidatesCount
     }
     
     func recognize(textFrom image: CIImage) throws -> [TextRecognitionCandidate] {
