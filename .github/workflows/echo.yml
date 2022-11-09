@@ -1,0 +1,13 @@
+name: Echo
+
+on: [workflow_dispatch]
+
+jobs:
+  log_echo:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Echo
+      run: echo "Hello World"
